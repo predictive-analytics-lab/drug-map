@@ -8,7 +8,7 @@ import plotly
 from flask_caching import Cache
 
 
-from mapping import args_to_map
+from .mapping import args_to_map
 
 server = Flask('drug map')
 server.secret_key = os.environ.get('secret_key', 'secret')
