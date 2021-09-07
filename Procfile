@@ -1,2 +1,2 @@
-web: gunicorn app:server
+web: gunicorn drug_map/app:server
 
