@@ -26,11 +26,11 @@ cache = Cache()
 
 cache_servers = os.environ.get('MEMCACHIER_SERVERS')
 if cache_servers == None:
-    cache.init_app(app, config={'CACHE_TYPE': 'simple'})
+    cache.init_app(app.server, config={'CACHE_TYPE': 'simple'})
 else:
     cache_user = os.environ.get('MEMCACHIER_USERNAME') or ''
     cache_pass = os.environ.get('MEMCACHIER_PASSWORD') or ''
-    cache.init_app(app,
+    cache.init_app(app.server,
         config={'CACHE_TYPE': 'saslmemcached',
                 'CACHE_MEMCACHED_SERVERS': cache_servers.split(','),
                 'CACHE_MEMCACHED_USERNAME': cache_user,
