@@ -9,24 +9,32 @@ import json
 
 data_path = Path(__file__).parent.parent / "data"
 
+def load_df():
+    dfs = {}
+    for file in data_path.iterdir():
+        dfs[file.name] = pd.read_csv(str(data_path / file), dtype={"FIPS": str})
+    return dfs
+
+data_dict = load_df()
+
 with urlopen('https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json') as response:
     counties = json.load(response)
     
-def args_to_map(drug_type: str = "cannabis", smoothed: bool = False, map_type: str = "standard") -> py.graph_objs.Figure:
+def args_to_map(drug_type: str = "cannabis", smoothed: bool = False, map_type: str = "standard", year: int = 2019) -> py.graph_objs.Figure:
     df = args_to_df(drug_type=drug_type, smoothed=smoothed)
     if map_type == "confidence":
-        return confidence_map(df)
+        return confidence_map(df, time_val = year)
     elif map_type == "standard":
-        return map_with_slider(df)
+        return map_with_slider(df, time_val = year)
     else:
         pass   
 
 def args_to_df(drug_type: str = "cannabis", smoothed: bool = False) -> pd.DataFrame:
     smoothed_str = "smoothed" if smoothed else "unsmoothed"
     filename = f"{drug_type}_{smoothed_str}.csv"
-    return pd.read_csv(str(data_path / filename), dtype={"FIPS": str})
+    return data_dict[filename]
 
-def confidence_map(df: pd.DataFrame, time_col: str = "year"):
+def confidence_map(df: pd.DataFrame, time_col: str = "year", time_val: int = 2019):
     
     color_map = {"S>5":"#E76258",
                  "S>2":"#EAB055",
@@ -35,6 +43,8 @@ def confidence_map(df: pd.DataFrame, time_col: str = "year"):
                  "S<0.5":"#265F47",
                  "S<0.2":"#52675B",
                  "S~1":"#689891"}
+    
+    df = df[df[time_col] == time_val]
 
     fig = px.choropleth_mapbox(
         df, 
@@ -54,14 +64,15 @@ def confidence_map(df: pd.DataFrame, time_col: str = "year"):
             "bwratio": "Black / White Ratio",
             "urban_code": "Urban Code",
             "frequency": "Population"},
-        zoom=3.7,
-        animation_frame=time_col
+        zoom=3.7
     )
     fig.update_geos(fitbounds="locations",visible=False, scope="usa")
     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0},)
     return fig
 
-def map_with_slider(df: pd.DataFrame, time_col: str = "year", log: bool = True,):
+def map_with_slider(df: pd.DataFrame, time_col: str = "year", time_val: int = 2019, log: bool = True,):
+    
+    df = df[df[time_col] == time_val]
 
     fig = px.choropleth_mapbox(
         df, 
