@@ -93,7 +93,7 @@ app.layout = html.Div([
             id='citype',
             options=[
                 {'label': 'Wilson Interval', 'value': 'wilson'},
-                {'label': 'Bootstrap', 'value': 'bootstraps'},
+                # {'label': 'Bootstrap', 'value': 'bootstraps'},
             ],
             style={'width': '100%', 'display': 'block'},
             value='wilson',
