@@ -20,8 +20,14 @@ data_dict = load_df()
 with urlopen('https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json') as response:
     counties = json.load(response)
     
-def args_to_map(drug_type: str = "cannabis", smoothed: bool = False, map_type: str = "standard", year: int = 2019) -> py.graph_objs.Figure:
-    df = args_to_df(drug_type=drug_type, smoothed=smoothed)
+def args_to_map(drug_type: str = "cannabis",
+                smoothed: bool = False,
+                map_type: str = "standard",
+                year: int = 2019,
+                citype: str = "wilson",
+                model: str = "normal",
+                ) -> py.graph_objs.Figure:
+    df = args_to_df(drug_type=drug_type, citype=citype, model=model, smoothed=smoothed)
     if map_type == "confidence":
         return confidence_map(df, time_val = year)
     elif map_type == "standard":
@@ -29,9 +35,18 @@ def args_to_map(drug_type: str = "cannabis", smoothed: bool = False, map_type: s
     else:
         pass   
 
-def args_to_df(drug_type: str = "cannabis", smoothed: bool = False) -> pd.DataFrame:
-    smoothed_str = "smoothed" if smoothed else "unsmoothed"
-    filename = f"{drug_type}_{smoothed_str}.csv"
+def args_to_df(drug_type: str,
+               citype: str,
+               model: str,
+               smoothed: bool) -> pd.DataFrame:
+    filename = f"selection_ratio_county_2012-2019_{citype}"
+    if model == "poverty":
+        filename += "_poverty"
+    elif model == "urban":
+        filename += "_urban"
+    return data_dict[filename + ".csv"]
+    
+    
     return data_dict[filename]
 
 def confidence_map(df: pd.DataFrame, time_col: str = "year", time_val: int = 2019):

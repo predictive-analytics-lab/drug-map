@@ -87,6 +87,27 @@ app.layout = html.Div([
             ],
             style={'width': '100%', 'display': 'block'},
             value='standard',
+            )]),className="two columns"),
+            html.Div(
+                html.Label(["CI Type:",dcc.RadioItems(
+            id='citype',
+            options=[
+                {'label': 'Wilson Interval', 'value': 'wilson'},
+                {'label': 'Bootstrap', 'value': 'bootstraps'},
+            ],
+            style={'width': '100%', 'display': 'block'},
+            value='wilson',
+            )]),className="two columns"),
+            html.Div(
+                html.Label(["Usage Model:",dcc.RadioItems(
+            id='usagemodel',
+            options=[
+                {'label': 'Age, Race, Sex', 'value': 'normal'},
+                {'label': 'Age, Race, Sex, Poverty Status', 'value': 'poverty'},
+                {'label': 'Age, Race, Sex, Urban Area', 'value': 'urban'},
+            ],
+            style={'width': '100%', 'display': 'block'},
+            value='normal',
             )]),className="two columns")
         ],className='row', style={"padding":"2% 2%"}),
     
@@ -107,14 +128,15 @@ app.layout = html.Div([
           'marginLeft': 'auto', 'marginRight': 'auto', "width": "auto", "height": "90vh",
           'boxShadow': '0px 0px 5px 5px rgba(204,204,204,0.4)'})
 
-@app.callback(Output('drug-map','figure'),[Input('drugtype','value'),Input('maptype','value'), Input('time-slider','value')])
+@app.callback(Output('drug-map','figure'),[Input('drugtype','value'),
+                                           Input('maptype','value'),
+                                           Input('usagemodel','value'),
+                                           Input('citype','value'),
+                                           Input('time-slider','value')])
 @cache.memoize(timeout=timeout)
-def update_graph(drugtype: str, maptype: str, time: int,) -> plotly.graph_objs.Figure:
-    print(drugtype)
-    print(maptype)
-    print(time)
+def update_graph(drugtype: str, maptype: str, model: str, citype: str, time: int,) -> plotly.graph_objs.Figure:
 
-    fig = mapping.args_to_map(drug_type=drugtype, smoothed=False, map_type=maptype, year=time)
+    fig = mapping.args_to_map(drug_type=drugtype, smoothed=False, map_type=maptype, year=time, citype=citype, model=model)
     # if relayout_data:
     #     if 'xaxis.range[0]' in relayout_data:
     #         fig['layout']['xaxis']['range'] = [
