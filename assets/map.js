@@ -17,6 +17,7 @@ function standard_map(data){
         geojson: 'https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json',
         zmin:-2,
         zmax:2,
+        opacity: 0.6,
         colorscale: "Viridis",
         customdata: arr,
         hovertemplate:
@@ -40,7 +41,7 @@ function getAllIndexes(arr, val) {
 
 function confidence_map(data){
 
-    var Figure = {'data': [], 'layout': {"showlegend": false, mapbox: {center: {'lat': 41.567243, 'lon': -101.271556}, zoom: 3.7, style:"carto-positron"}}, 'config': {mapboxAccessToken: "pk.eyJ1IjoiYnJhZGxleWJ1dGNoZXIiLCJhIjoiY2t0Y3I0ZHBjMjhkNzJ2bGFrNGR6cWFycSJ9.cREa4cbb8CChjWfTKMWQbQ"}};
+    var Figure = {'data': [], 'layout': {"showlegend": true, mapbox: {center: {'lat': 41.567243, 'lon': -101.271556}, zoom: 3.7, style:"carto-positron"}}, 'config': {mapboxAccessToken: "pk.eyJ1IjoiYnJhZGxleWJ1dGNoZXIiLCJhIjoiY2t0Y3I0ZHBjMjhkNzJ2bGFrNGR6cWFycSJ9.cREa4cbb8CChjWfTKMWQbQ"}};
 
     color_map = {
         "S>5":"#E76258",
@@ -83,6 +84,9 @@ function confidence_map(data){
             colorscale: [[0.0, color_map[color]], [1.0, color_map[color]]],
             name: color,
             customdata: arr,
+            opacity: 0.6,
+            showscale: false,
+            showlegend: true,
             hovertemplate:
             "Category: %{customdata[3]}<br>Selection Ratio: %{customdata[2]}<br>Incidents: %{customdata[0]}<br>Black-White Population Ratio: %{customdata[1]:.3f}<extra></extra>"
         };
