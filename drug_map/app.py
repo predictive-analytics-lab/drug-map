@@ -66,8 +66,7 @@ app.layout = html.Div(
                     children=[
                         html.H2("USA DRUG BIAS MAP"),
                         html.P(
-                            """Select different days using the date picker or by selecting
-                            different time frames on the histogram."""
+                            """Select different drugs, as well as different map types and usage models by changing the options below."""
                         ),
                         html.Div(html.Label(["Drug Type:",dcc.Dropdown(
                         id='drugtype',
