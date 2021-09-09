@@ -15,14 +15,7 @@ from . import mapping
 server = Flask('drug map')
 server.secret_key = os.environ.get('secret_key', 'secret')
 
-external_stylesheets = ["https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css",
-                "https://cdn.rawgit.com/plotly/dash-app-stylesheets/737dc4ab11f7a1a8d6b5645d26f69133d97062ae/dash-wind-streaming.css",
-                "https://fonts.googleapis.com/css?family=Raleway:400,400i,700,700i",
-                "https://fonts.googleapis.com/css?family=Product+Sans:400,400i,700,700i",
-                "https://codepen.io/chriddyp/pen/bWLwgP.css",
-                ]
-
-app = dash.Dash('Drug map', server=server, external_stylesheets=external_stylesheets)
+app = dash.Dash('Drug map', server=server)
 
 cache = Cache()
 
@@ -61,71 +54,87 @@ if 'DYNO' in os.environ:
         'external_url': 'https://cdn.rawgit.com/chriddyp/ca0d8f02a1659981a0ea7f013a378bbd/raw/e79f3f789517deec58f41251f7dbb6bee72c44ab/plotly_ga.js'
     })
 
-app.layout = html.Div([
-    dcc.Store(
-        id='clientside-data-store',
-    ),
-    html.Div([
-        html.H3("USA Drug Bias Map"),
-    ], className='row', style={'text-align': "center"}),
-    html.Div([
-        html.Div([
-            html.Div(html.Label(["Drug Type:",dcc.Dropdown(
-                id='drugtype',
-                options=[
-                    {'label': 'Cannabis', 'value': 'cannabis'}],
-                style={'width': '100%', 'display': 'block'},
-                value='cannabis'
-                )]),className="two columns"),
-            html.Div(
-                html.Label(["Map Type:",dcc.RadioItems(
-            id='maptype',
-            options=[
-                {'label': 'Standard', 'value': 'standard'},
-                {'label': '95% Confidence', 'value': 'confidence'},
+app.layout = html.Div(
+    children=[
+        dcc.Store(id='clientside-data-store'),
+        html.Div(
+            className="row",
+            children=[
+                # Column for user controls
+                html.Div(
+                    className="three columns div-user-controls",
+                    children=[
+                        html.H2("USA DRUG BIAS MAP"),
+                        html.P(
+                            """Select different days using the date picker or by selecting
+                            different time frames on the histogram."""
+                        ),
+                        html.Div(html.Label(["Drug Type:",dcc.Dropdown(
+                        id='drugtype',
+                        options=[
+                            {'label': 'Cannabis', 'value': 'cannabis'}],
+                        style={'width': '100%', 'display': 'block'},
+                        value='cannabis'
+                        )]),className="div-for-dropdown"),
+                    html.Div(
+                        html.Label(["Map Type:",dcc.RadioItems(
+                    id='maptype',
+                    options=[
+                        {'label': 'Standard', 'value': 'standard'},
+                        {'label': '95% Confidence', 'value': 'confidence'},
+                    ],
+                    style={'width': '100%', 'display': 'block'},
+                    value='standard',
+                    )]),className="div-for-dropdown"),
+                    html.Div(
+                        html.Label(["CI Type:",dcc.RadioItems(
+                    id='citype',
+                    options=[
+                        {'label': 'Wilson Interval', 'value': 'wilson'},
+                        # {'label': 'Bootstrap', 'value': 'bootstraps'},
+                    ],
+                    style={'width': '100%', 'display': 'block'},
+                    value='wilson',
+                    )]),className="div-for-dropdown"),
+                    html.Div(
+                        html.Label(["Usage Model:",dcc.RadioItems(
+                    id='usagemodel',
+                    options=[
+                        {'label': 'Age, Race, Sex', 'value': 'normal'},
+                        {'label': 'Age, Race, Sex, Poverty Status', 'value': 'poverty'},
+                        {'label': 'Age, Race, Sex, Urban Area', 'value': 'urban'},
+                    ],
+                    style={'width': '100%', 'display': 'block'},
+                    value='normal',
+                    )]),className="div-for-dropdown"),
+                    dcc.Markdown(
+                        """
+                        Source: NIBRS Drug Incidient Bias - Link to paper to be added.
+                        
+                        Links: [Source Code](https://github.com/predictive-analytics-lab/drug-map) | [Twitter] (https://twitter.com/WeArePal_ai)
+                        """
+                    ),
+                    ],
+                ),
+                # Column for app graphs and plots
+                html.Div(
+                    className="nine columns div-for-charts bg-grey",
+                    children=[
+                        dcc.Graph(id="drug-map", style={"height":"93vh"}),
+                        dcc.Slider(
+                            id='time-slider',
+                            min=2012,
+                            max=2019,
+                            step=1,
+                            value=2019,
+                            marks={year: str(year) for year in range(2012, 2020)})
+                    ],
+                ),
             ],
-            style={'width': '100%', 'display': 'block'},
-            value='standard',
-            )]),className="two columns"),
-            html.Div(
-                html.Label(["CI Type:",dcc.RadioItems(
-            id='citype',
-            options=[
-                {'label': 'Wilson Interval', 'value': 'wilson'},
-                # {'label': 'Bootstrap', 'value': 'bootstraps'},
-            ],
-            style={'width': '100%', 'display': 'block'},
-            value='wilson',
-            )]),className="two columns"),
-            html.Div(
-                html.Label(["Usage Model:",dcc.RadioItems(
-            id='usagemodel',
-            options=[
-                {'label': 'Age, Race, Sex', 'value': 'normal'},
-                {'label': 'Age, Race, Sex, Poverty Status', 'value': 'poverty'},
-                {'label': 'Age, Race, Sex, Urban Area', 'value': 'urban'},
-            ],
-            style={'width': '100%', 'display': 'block'},
-            value='normal',
-            )]),className="two columns")
-        ],className='row', style={"padding":"2% 2%"}),
-    
-    html.Div(id='dd-output-container')
-        ], className="row"
-    ),
-    dcc.Loading(id = "loading-icon", children=[html.Div([
-            dcc.Graph(id="drug-map", style={"height":"70vh","width":"100%"}),
-    ])], type="circle"),
-    dcc.Slider(
-        id='time-slider',
-        min=2012,
-        max=2019,
-        step=1,
-        value=2019,
-        marks={year: str(year) for year in range(2012, 2020)}),
-], style={'padding': '0px 10px 15px 10px',
-          'marginLeft': 'auto', 'marginRight': 'auto', "width": "auto", "height": "90vh",
-          'boxShadow': '0px 0px 5px 5px rgba(204,204,204,0.4)'})
+        )
+    ]
+)
+
 
 @app.callback(Output('clientside-data-store','data'),[Input('drugtype','value'),
                                            Input('usagemodel','value'),
