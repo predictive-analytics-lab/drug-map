@@ -38,13 +38,15 @@ def args_to_map(drug_type: str = "cannabis",
 def args_to_df(drug_type: str,
                citype: str,
                model: str,
-               smoothed: bool) -> pd.DataFrame:
+               smoothed: bool,
+               year: int = 2019) -> pd.DataFrame:
     filename = f"selection_ratio_county_2012-2019_{citype}"
     if model == "poverty":
         filename += "_poverty"
     elif model == "urban":
         filename += "_urban"
-    return data_dict[filename + ".csv"]
+    df = data_dict[filename + ".csv"]
+    return df[df["year"] == year]
     
     
     return data_dict[filename]

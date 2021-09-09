@@ -1,14 +1,16 @@
 import dash
 from dash import dcc
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output, State, ClientsideFunction
 from dash import html
 from flask import Flask
 import os
 import plotly
 from flask_caching import Cache
-
+import pandas as pd
+import json
 
 from . import mapping
+
 
 server = Flask('drug map')
 server.secret_key = os.environ.get('secret_key', 'secret')
@@ -54,18 +56,15 @@ else:
 
 timeout = 60 * 60 * 24 * 7 # 7 days
 
-
-
-def default_map() -> plotly.graph_objs.Figure:
-    return mapping.args_to_map()
-    
-
 if 'DYNO' in os.environ:
     app.scripts.append_script({
         'external_url': 'https://cdn.rawgit.com/chriddyp/ca0d8f02a1659981a0ea7f013a378bbd/raw/e79f3f789517deec58f41251f7dbb6bee72c44ab/plotly_ga.js'
     })
 
 app.layout = html.Div([
+    dcc.Store(
+        id='clientside-data-store',
+    ),
     html.Div([
         html.H3("USA Drug Bias Map"),
     ], className='row', style={'text-align': "center"}),
@@ -115,7 +114,7 @@ app.layout = html.Div([
         ], className="row"
     ),
     dcc.Loading(id = "loading-icon", children=[html.Div([
-            dcc.Graph(id="drug-map", figure=default_map(), style={"height":"70vh","width":"100%"}),
+            dcc.Graph(id="drug-map", style={"height":"70vh","width":"100%"}),
     ])], type="circle"),
     dcc.Slider(
         id='time-slider',
@@ -128,28 +127,25 @@ app.layout = html.Div([
           'marginLeft': 'auto', 'marginRight': 'auto', "width": "auto", "height": "90vh",
           'boxShadow': '0px 0px 5px 5px rgba(204,204,204,0.4)'})
 
-@app.callback(Output('drug-map','figure'),[Input('drugtype','value'),
-                                           Input('maptype','value'),
+@app.callback(Output('clientside-data-store','data'),[Input('drugtype','value'),
                                            Input('usagemodel','value'),
                                            Input('citype','value'),
                                            Input('time-slider','value')])
 @cache.memoize(timeout=timeout)
-def update_graph(drugtype: str, maptype: str, model: str, citype: str, time: int,) -> plotly.graph_objs.Figure:
+def update_store(drugtype: str, model: str, citype: str, time: int,) -> pd.DataFrame:
+    df = mapping.args_to_df(drug_type=drugtype, smoothed=False, year=time, citype=citype, model=model)
+    return df.reset_index().to_dict(orient='list')
 
-    fig = mapping.args_to_map(drug_type=drugtype, smoothed=False, map_type=maptype, year=time, citype=citype, model=model)
-    # if relayout_data:
-    #     if 'xaxis.range[0]' in relayout_data:
-    #         fig['layout']['xaxis']['range'] = [
-    #             relayout_data['xaxis.range[0]'],
-    #             relayout_data['xaxis.range[1]']
-    #         ]
-    #     if 'yaxis.range[0]' in relayout_data:
-    #         fig['layout']['yaxis']['range'] = [
-    #             relayout_data['yaxis.range[0]'],
-    #             relayout_data['yaxis.range[1]']
-    #         ]
-    return fig
-    
+
+app.clientside_callback(
+    ClientsideFunction(
+        namespace='clientside',
+        function_name='get_map'
+    ),
+    Output('drug-map', 'figure'),
+    Input('clientside-data-store', 'data'),
+    Input('maptype', 'value')
+)
 
 
 # if __name__ == '__main__':
