@@ -6,6 +6,7 @@ function standard_map(data){
     arr.push(data["incidents"]);
     arr.push(data["bwratio"]);
     arr.push(data["slci"]);
+    arr.push(data["perc_republican_votes"]);
 
 
     transpose = m => m[0].map((x,i) => m.map(x => x[i]))
@@ -21,7 +22,7 @@ function standard_map(data){
         colorscale: "Viridis",
         customdata: arr,
         hovertemplate:
-            "Selection Ratio: %{customdata[2]}<br>Incidents: %{customdata[0]}<br>Black-White Population Ratio: %{customdata[1]:.3f}<extra></extra>"
+            "Selection ratio: %{customdata[2]}<br>Incidents: %{customdata[0]}<br>Black/White population ratio: %{customdata[1]:.3f}<br>Republican vote share: %{customdata[3]}\%<extra></extra>"
       }];
       
       var layout = {"uirevision":"test", "margin": {"t": 0, "b": 0, "l": 0, r:"0"}, mapbox: {center: {'lat': 40.567243, 'lon': -96.271556}, zoom: 3.7, style:"carto-positron"}};
@@ -71,7 +72,8 @@ function confidence_map(data){
         arr.push(idxs.map(i => data["bwratio"][i]));
         arr.push(idxs.map(i => data["slci"][i]));
         arr.push(idxs.map(i => data["cat"][i]));
-    
+        arr.push(idxs.map(i => data["perc_republican_votes"][i]));
+
         transpose = m => m[0].map((x,i) => m.map(x => x[i]))
         
         arr = transpose(arr);
@@ -88,7 +90,7 @@ function confidence_map(data){
             showscale: false,
             showlegend: true,
             hovertemplate:
-            "Category: %{customdata[3]}<br>Selection Ratio: %{customdata[2]}<br>Incidents: %{customdata[0]}<br>Black-White Population Ratio: %{customdata[1]:.3f}<extra></extra>"
+            "Category: %{customdata[3]}<br>Selection ratio: %{customdata[2]}<br>Incidents: %{customdata[0]}<br>Black/White population ratio: %{customdata[1]:.3f}<br>Republican vote share: %{customdata[4]}\%<extra></extra>"
         };
 
         Figure["data"].push(pldata)

@@ -109,7 +109,7 @@ app.layout = html.Div(
                     value='normal',
                     )]),className="div-for-dropdown"),
                     html.Div(
-                    html.Label(["Republican Vote Share:", dcc.Checklist(
+                    html.Label(["Republican Vote Share (2020):", dcc.Checklist(
                         id="republican-boxes",
                         options=[
                             {'label': '<20%', 'value': '<20%'},

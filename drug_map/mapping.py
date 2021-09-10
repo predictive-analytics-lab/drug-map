@@ -40,4 +40,5 @@ def args_to_df(drug_type: str,
     df = data_dict[filename + ".csv"]
     df = df[df["year"] == year]
     df = df[disjunction(*[df.prop_republican == rc for rc in republican_cats])]
+    df["perc_republican_votes"] = (df["perc_republican_votes"] * 100).astype(int)
     return df
