@@ -125,6 +125,10 @@ a {
   border:none;
 }
 
+.modebar{
+  display: none !important;
+}
+
 .DateInput.DateInput_1 {
   background-color: #1e1e1e;
 }

@@ -46,12 +46,39 @@ def confidence_categorization_alt(df: pd.DataFrame, value_col: str, ub_col: str,
     df["cat"] = df.apply(lambda x: _categorization(x[value_col], x[lb_col], x[ub_col]), axis=1)
     return df
 
+def republican_categorization(df: pd.DataFrame, value_col: str) -> pd.DataFrame:
+    def _categorization(v):
+        if v < 0.2:
+            return "<20%"
+        if v < 0.4:
+            return "20-40%"
+        if v < 0.6:
+            return "40-60%"
+        if v < 0.8:
+            return "60-80%"
+        if v <= 1:
+            return "80-100%"
+        return ">100% ???"
+    df["prop_republican"] = df.apply(lambda x: _categorization(x[value_col]), axis=1)
+    return df
+    
+    
 def additions(df: pd.DataFrame) -> pd.DataFrame:
     if "ci" in df.columns:
         df = confidence_categorization(df, "selection_ratio", "ci")
     else:
         df = confidence_categorization_alt(df, "selection_ratio", "ub", "lb")
-
+        
+    election = pd.read_csv(data_path / "election_results_x_county.csv", dtype={"FIPS": str}, usecols=["year", "FIPS", "perc_republican_votes"])
+    
+    election = election[election.year == 2020]
+    
+    election = election.drop(columns={"year"})
+    
+    df = df.merge(election, on="FIPS", how="left")
+    
+    df = republican_categorization(df, "perc_republican_votes")
+    
     df["frequency"] = df["frequency"].apply(lambda x: f'{int(x):,}')
     df["bwratio"] = df["bwratio"].apply(lambda x: f'{x:.3f}')
     
@@ -66,5 +93,7 @@ def additions(df: pd.DataFrame) -> pd.DataFrame:
 
 if __name__ == "__main__":
     for file in data_path.iterdir():
+        if "selection" not in str(file):
+            continue
         df = additions(pd.read_csv(str(data_path / file), dtype={"FIPS": str}))
         df.to_csv(file, index=False)

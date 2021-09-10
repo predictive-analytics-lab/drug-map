@@ -24,7 +24,7 @@ function standard_map(data){
             "Selection Ratio: %{customdata[2]}<br>Incidents: %{customdata[0]}<br>Black-White Population Ratio: %{customdata[1]:.3f}<extra></extra>"
       }];
       
-      var layout = {"uirevision":"test", "margin": {"t": 0, "b": 0, "l": 0, r:"0"}, mapbox: {center: {'lat': 41.567243, 'lon': -101.271556}, zoom: 3.7, style:"carto-positron"}};
+      var layout = {"uirevision":"test", "margin": {"t": 0, "b": 0, "l": 0, r:"0"}, mapbox: {center: {'lat': 40.567243, 'lon': -96.271556}, zoom: 3.7, style:"carto-positron"}};
       
       var config = {mapboxAccessToken: "pk.eyJ1IjoicGxvdGx5bWFwYm94IiwiYSI6ImNrOWJqb2F4djBnMjEzbG50amg0dnJieG4ifQ.Zme1-Uzoi75IaFbieBDl3A"};
       
@@ -41,7 +41,7 @@ function getAllIndexes(arr, val) {
 
 function confidence_map(data){
 
-    var Figure = {'data': [], 'layout': {"uirevision":"test", "margin": {"t": 0, "b": 0, "l": 0, r:"0"}, "showlegend": true, mapbox: {center: {'lat': 41.567243, 'lon': -101.271556}, zoom: 3.7, style:"carto-positron"}}, 'config': {mapboxAccessToken: "pk.eyJ1IjoiYnJhZGxleWJ1dGNoZXIiLCJhIjoiY2t0Y3I0ZHBjMjhkNzJ2bGFrNGR6cWFycSJ9.cREa4cbb8CChjWfTKMWQbQ"}};
+    var Figure = {'data': [], 'layout': {"uirevision":"test", "margin": {"t": 0, "b": 0, "l": 0, r:"0"}, "showlegend": true, mapbox: {center: {'lat': 40.567243, 'lon': -96.271556}, zoom: 3.7, style:"carto-positron"}}, 'config': {mapboxAccessToken: "pk.eyJ1IjoiYnJhZGxleWJ1dGNoZXIiLCJhIjoiY2t0Y3I0ZHBjMjhkNzJ2bGFrNGR6cWFycSJ9.cREa4cbb8CChjWfTKMWQbQ"}};
 
     color_map = {
         "S>5":"#E76258",

@@ -1,3 +1,4 @@
+from typing import List
 import dash
 from dash import dcc
 from dash.dependencies import Input, Output, State, ClientsideFunction
@@ -82,7 +83,8 @@ app.layout = html.Div(
                         {'label': 'Standard', 'value': 'standard'},
                         {'label': '95% Confidence', 'value': 'confidence'},
                     ],
-                    style={'width': '100%', 'display': 'block'},
+                    labelStyle={'display': 'inline-block', "padding-right": "10px"},
+                    style={'width': '100%', 'display': 'block', "margin-right": "10px"},
                     value='standard',
                     )]),className="div-for-dropdown"),
                     html.Div(
@@ -106,6 +108,19 @@ app.layout = html.Div(
                     style={'width': '100%', 'display': 'block'},
                     value='normal',
                     )]),className="div-for-dropdown"),
+                    html.Div(
+                    html.Label(["Republican Vote Share:", dcc.Checklist(
+                        id="republican-boxes",
+                        options=[
+                            {'label': '<20%', 'value': '<20%'},
+                            {'label': '20-40%', 'value': '20-40%'},
+                            {'label': '40-60%', 'value': '40-60%'},
+                            {'label': '60-80%', 'value': '60-80%'},
+                            {'label': '80-100%', 'value': '80-100%'},
+                        ],
+                        value=['<20%', '20-40%', '40-60%', '60-80%', '80-100%'],
+                        labelStyle={'display': 'inline-block', "padding-right": "10px"}
+                    )]), className="div-for-dropdown"),
                     dcc.Markdown(
                         """
                         Source: NIBRS Drug Incidient Bias - Link to paper to be added.
@@ -138,10 +153,11 @@ app.layout = html.Div(
 @app.callback(Output('clientside-data-store','data'),[Input('drugtype','value'),
                                            Input('usagemodel','value'),
                                            Input('citype','value'),
-                                           Input('time-slider','value')])
+                                           Input('time-slider','value'),
+                                           Input('republican-boxes','value')])
 @cache.memoize(timeout=timeout)
-def update_store(drugtype: str, model: str, citype: str, time: int,) -> pd.DataFrame:
-    df = mapping.args_to_df(drug_type=drugtype, smoothed=False, year=time, citype=citype, model=model)
+def update_store(drugtype: str, model: str, citype: str, time: int, republican: List[str]) -> pd.DataFrame:
+    df = mapping.args_to_df(drug_type=drugtype, smoothed=False, year=time, citype=citype, model=model, republican_cats=republican)
     return df.reset_index().to_dict(orient='list')
 
 
