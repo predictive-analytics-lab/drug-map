@@ -79,6 +79,9 @@ def additions(df: pd.DataFrame) -> pd.DataFrame:
     
     df = republican_categorization(df, "perc_republican_votes")
     
+    df["perc_republican_votes"] = (df["perc_republican_votes"] * 100).astype(int)
+
+    
     df["frequency"] = df["frequency"].apply(lambda x: f'{int(x):,}')
     df["bwratio"] = df["bwratio"].apply(lambda x: f'{x:.3f}')
     
