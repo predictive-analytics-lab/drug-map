@@ -76,11 +76,22 @@ app.layout = html.Div(
                         style={'width': '100%', 'display': 'block'},
                         value='cannabis'
                         )]),className="div-for-dropdown"),
+                    html.Div(html.Label(["Geospatial Smoothing:", 
+                        dcc.RadioItems(
+                            id='smoothing',
+                            options=[
+                            {'label': 'On', 'value': 'on'},
+                            {'label': 'Off', 'value': 'off'},
+                            ],
+                        style={'width': '100%', 'display': 'block'},
+                        value='off'
+                        )]),className="div-for-dropdown"),
                     html.Div(
                         html.Label(["Map Type:",dcc.RadioItems(
                     id='maptype',
                     options=[
-                        {'label': 'Standard', 'value': 'standard'},
+                        {'label': 'Quantiles', 'value': 'quantiles'},
+                        {'label': 'Log', 'value': 'standard'},
                         {'label': '95% Confidence', 'value': 'confidence'},
                     ],
                     labelStyle={'display': 'inline-block', "padding-right": "10px"},
@@ -149,15 +160,36 @@ app.layout = html.Div(
     ]
 )
 
+@app.callback([Output('maptype','value'), Output('citype', 'value'), Output('usagemodel','value'), Output('maptype','options'), Output('citype','options'), Output('usagemodel','options')], [Input('smoothing', 'value')])
+def dynamic_options(smoothing: str):
+    bool_switch = smoothing == "on"
+    map_type_options = [
+        {'label': 'Quantiles', 'value': 'quantiles', "disabled": bool_switch},
+        {'label': 'Log', 'value': 'standard', "disabled": False},
+        {'label': '95% Confidence', 'value': 'confidence', "disabled": bool_switch},
+    ]
+    ci_type_options = [{'label': 'None', 'value': 'none', "disabled": False}, 
+                       {'label': 'Wilson Interval', 'value': 'wilson', "disabled": bool_switch}]
+    model_options = [
+        {'label': 'Age, Race, Sex', 'value': 'normal', "disabled": False},
+        {'label': 'Age, Race, Sex, Poverty Status', 'value': 'poverty', "disabled": bool_switch},
+        {'label': 'Age, Race, Sex, Urban Area', 'value': 'urban', "disabled": bool_switch},
+    ]
+    if bool_switch:
+        return "standard", "none", "normal", map_type_options, ci_type_options, model_options
+    else:
+        return "standard", "wilson", "normal", map_type_options, ci_type_options, model_options
+        
 
 @app.callback(Output('clientside-data-store','data'),[Input('drugtype','value'),
                                            Input('usagemodel','value'),
                                            Input('citype','value'),
                                            Input('time-slider','value'),
-                                           Input('republican-boxes','value')])
+                                           Input('republican-boxes','value'),
+                                           Input('smoothing', 'value')])
 @cache.memoize(timeout=timeout)
-def update_store(drugtype: str, model: str, citype: str, time: int, republican: List[str]) -> pd.DataFrame:
-    df = mapping.args_to_df(drug_type=drugtype, smoothed=False, year=time, citype=citype, model=model, republican_cats=republican)
+def update_store(drugtype: str, model: str, citype: str, time: int, republican: List[str], smoothed: str) -> pd.DataFrame:
+    df = mapping.args_to_df(drug_type=drugtype, smoothed=smoothed == "on", year=time, citype=citype, model=model, republican_cats=republican)
     return df.reset_index().to_dict(orient='list')
 
 
@@ -168,7 +200,8 @@ app.clientside_callback(
     ),
     Output('drug-map', 'figure'),
     Input('clientside-data-store', 'data'),
-    Input('maptype', 'value')
+    Input('maptype', 'value'),
+    Input('smoothing', 'value')
 )
 
 

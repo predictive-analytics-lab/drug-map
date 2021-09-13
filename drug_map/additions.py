@@ -1,6 +1,8 @@
 import pandas as pd
 from pathlib import Path
 import numpy as np
+from functools import partial
+from scipy.stats import percentileofscore
 
 data_path = Path(__file__).parent.parent / "data"
 
@@ -61,12 +63,19 @@ def republican_categorization(df: pd.DataFrame, value_col: str) -> pd.DataFrame:
         return ">100% ???"
     df["prop_republican"] = df.apply(lambda x: _categorization(x[value_col]), axis=1)
     return df
-    
-    
+
+def add_quantiles(df: pd.DataFrame, quantile_col: str, output_col: str, q: int = 4) -> pd.DataFrame:
+    vals = np.nan_to_num(df[quantile_col])
+    dq = np.quantile(vals, q=np.linspace(0, 1, q + 1)[1:])
+    quantile_conv = lambda x: int(percentileofscore(dq, x, kind="weak"))
+    df[output_col] = [quantile_conv(vi) for vi in vals]
+    return df
+
+  
 def additions(df: pd.DataFrame) -> pd.DataFrame:
     if "ci" in df.columns:
         df = confidence_categorization(df, "selection_ratio", "ci")
-    else:
+    elif "lb" in df.columns:
         df = confidence_categorization_alt(df, "selection_ratio", "ub", "lb")
         
     election = pd.read_csv(data_path / "election_results_x_county.csv", dtype={"FIPS": str}, usecols=["year", "FIPS", "perc_republican_votes"])
@@ -81,22 +90,24 @@ def additions(df: pd.DataFrame) -> pd.DataFrame:
     
     df["perc_republican_votes"] = (df["perc_republican_votes"] * 100).astype(int)
 
-    
     df["frequency"] = df["frequency"].apply(lambda x: f'{int(x):,}')
     df["bwratio"] = df["bwratio"].apply(lambda x: f'{x:.3f}')
     
     if "ci" in df.columns:
         df["slci"] = df["selection_ratio"].round(3).astype(str) + " ± " + df["ci"].round(3).astype(str)
-    else:
+    elif "lb" in df.columns:
         df["slci"] = df["selection_ratio"].round(3).astype(str) + "(" + df["lb"].round(3).astype(str) + " - " + df["ub"].round(3).astype(str) + ")"
 
     df["selection_ratio_log10"] = np.log10(df["selection_ratio"])
-
+    
+    df = add_quantiles(df, "selection_ratio", "quantiles", q=4)
+    df = add_quantiles(df, "selection_ratio", "percentiles", q=100)
+    
     return df
 
 if __name__ == "__main__":
-    for file in data_path.iterdir():
+    for file in (data_path / "raw").iterdir():
         if "selection" not in str(file):
             continue
-        df = additions(pd.read_csv(str(data_path / file), dtype={"FIPS": str}))
-        df.to_csv(file, index=False)
+        df = additions(pd.read_csv(str(file), dtype={"FIPS": str}))
+        df.to_csv(data_path / file.name, index=False)

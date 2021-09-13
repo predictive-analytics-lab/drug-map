@@ -14,6 +14,8 @@ data_path = Path(__file__).parent.parent / "data"
 def load_df():
     dfs = {}
     for file in data_path.iterdir():
+        if file.is_dir():
+            continue
         dfs[file.name] = pd.read_csv(str(data_path / file), dtype={"FIPS": str})
     return dfs
 
@@ -37,6 +39,8 @@ def args_to_df(drug_type: str,
         filename += "_poverty"
     elif model == "urban":
         filename += "_urban"
+    if smoothed:
+        filename += "_smoothed"
     df = data_dict[filename + ".csv"]
     df = df[df["year"] == year]
     df = df[disjunction(*[df.prop_republican == rc for rc in republican_cats])]
