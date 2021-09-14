@@ -33,14 +33,17 @@ def args_to_df(drug_type: str,
                model: str,
                smoothed: bool,
                year: int = 2019,
-               republican_cats: List[str] = ['<20%', '20-40%', '40-60%', '60-80%', '80-100%']) -> pd.DataFrame:
+               republican_cats: List[str] = ['<20%', '20-40%', '40-60%', '60-80%', '80-100%'],
+               urban_filter: str = "2") -> pd.DataFrame:
     filename = f"selection_ratio_county_2012-2019_{citype}"
     if model == "poverty":
         filename += "_poverty"
     elif model == "urban":
         filename += "_urban"
+    if urban_filter != "2":
+        filename += f"_urban_filter_{urban_filter}"
     if smoothed:
-        filename += "_smoothed"
+        filename += "_smoothed"        
     df = data_dict[filename + ".csv"]
     df = df[df["year"] == year]
     df = df[disjunction(*[df.prop_republican == rc for rc in republican_cats])]

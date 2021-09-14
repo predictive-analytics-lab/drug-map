@@ -67,6 +67,7 @@ if 'DYNO' in os.environ:
 
 base_ui = html.Div(className="",
     children=[
+        dcc.RadioItems(id='urbanfilter', value="2", style = dict(display='none')),
         html.H2("USA DRUG BIAS MAP"),
         html.P(
             """Select different drugs, as well as different map types and usage models by changing the options below."""
@@ -85,8 +86,8 @@ base_ui = html.Div(className="",
                 dcc.RadioItems(
                     id='maptype',
                     options=[
-                        {'label': 'Quantiles', 'value': 'quantiles'},
                         {'label': 'Log', 'value': 'standard'},
+                        {'label': 'Quantiles', 'value': 'quantiles'},
                         {'label': '95% Confidence', 'value': 'confidence'},
                     ],
                     labelStyle={'display': 'inline-block', "padding-right": "10px"},
@@ -164,8 +165,8 @@ smoothing_ui = html.Div(className="",
                 dcc.RadioItems(
                     id='maptype',
                     options=[
-                        {'label': 'Quantiles', 'value': 'quantiles'},
                         {'label': 'Log', 'value': 'standard'},
+                        {'label': 'Quantiles', 'value': 'quantiles'},
                         {'label': '95% Confidence', 'value': 'confidence'},
                     ],
                     labelStyle={'display': 'inline-block', "padding-right": "10px"},
@@ -183,6 +184,16 @@ smoothing_ui = html.Div(className="",
                     style={'width': '100%', 'display': 'block'},
                     value='wilson',
                     )]),
+            className="div-for-dropdown"),
+        html.Div(
+            html.Label(["Urban Filter:",      
+                dcc.Slider(
+                    id='urbanfilter',
+                    min=2,
+                    max=3,
+                    value=2,
+                    marks={m: str(m) for m in range(2, 4)}
+                )]),
             className="div-for-dropdown"),
         html.Div(
             html.Label(["Republican Vote Share (2020):", 
@@ -271,13 +282,14 @@ def update_ui(tabs: str) -> list:
         Input('citype','value'),
         Input('time-slider','value'),
         Input('republican-boxes','value'),
+        Input('urbanfilter','value'),
     ],
     [
         State('tabs', 'value')
     ])
 @cache.memoize(timeout=timeout)
-def update_data(drugtype: str, model: str, citype: str, time: int, republican: List[str], tab: str) -> dict:
-    df = mapping.args_to_df(drug_type=drugtype, smoothed=tab=="smoothed", year=time, citype=citype, model=model, republican_cats=republican)
+def update_data(drugtype: str, model: str, citype: str, time: int, republican: List[str], urban_filter: int, tab: str) -> dict:
+    df = mapping.args_to_df(drug_type=drugtype, smoothed=tab=="smoothed", year=time, citype=citype, model=model, republican_cats=republican, urban_filter=str(urban_filter))
     df_dict = df.reset_index().to_dict(orient='list')
     return [df_dict]
 
