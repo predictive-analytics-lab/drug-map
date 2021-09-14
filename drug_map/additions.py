@@ -103,6 +103,8 @@ def additions(df: pd.DataFrame) -> pd.DataFrame:
     df = add_quantiles(df, "selection_ratio", "quantiles", q=4)
     df = add_quantiles(df, "selection_ratio", "percentiles", q=100)
     
+    df["selection_ratio"] = df["selection_ratio"].apply(lambda x: f'{x:.3f}')
+    
     return df
 
 if __name__ == "__main__":

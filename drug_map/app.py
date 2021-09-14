@@ -10,7 +10,7 @@ from flask_caching import Cache
 import pandas as pd
 import json
 
-import mapping
+from . import mapping
 
 
 server = Flask('drug map')
@@ -267,6 +267,3 @@ app.clientside_callback(
     Input('maptype', 'value'),
     State('tabs', 'value')
 )
-
-if __name__ == "__main__":
-    server.run(debug=True)
