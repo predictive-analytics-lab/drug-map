@@ -9,6 +9,7 @@ body {
   margin: 0;
   padding: 0;
 }
+
 h1, h2, h3, h4, h5 {
   font-family: "Open Sans";
   font-weight: bold;
@@ -23,17 +24,23 @@ p {
   padding-left: 12px;
 }
 
-#time-slider {
+.rc-slider {
+  padding-top: 3vh;
+}
+
+.rc-slider-mark-text {
+  padding-top: 2vh;
   font-family: "Open Sans";
   font-weight: 400;
-  font-size: 14px;
+  color: #FFFFFF;
+  font-size: 16px;
 }
 
 a {
   text-decoration: none;
 }
 .bg-grey{
-  background-color: #31302F;
+  background-color: #1E1E1E;
 }
 .text-padding{
   padding: 5px;

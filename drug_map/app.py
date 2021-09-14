@@ -10,7 +10,7 @@ from flask_caching import Cache
 import pandas as pd
 import json
 
-from . import mapping
+import mapping
 
 
 server = Flask('drug map')
@@ -46,7 +46,7 @@ else:
                     'remove_failed': 1,
                     'retry_timeout': 2,
                     'dead_timeout': 30}}})
-# cache.clear() # remove when deploy
+cache.clear() # remove when deploy
 
 timeout = 60 * 60 * 24 * 7 # 7 days
 
@@ -54,40 +54,35 @@ if 'DYNO' in os.environ:
     app.scripts.append_script({
         'external_url': 'https://cdn.rawgit.com/chriddyp/ca0d8f02a1659981a0ea7f013a378bbd/raw/e79f3f789517deec58f41251f7dbb6bee72c44ab/plotly_ga.js'
     })
+            # html.Div(html.Label(["Geospatial Smoothing:", 
+            #             dcc.RadioItems(
+            #                 id='smoothing',
+            #                 options=[
+            #                 {'label': 'On', 'value': 'on'},
+            #                 {'label': 'Off', 'value': 'off'},
+            #                 ],
+            #             style={'width': '100%', 'display': 'block'},
+            #             value='off'
+            #             )]),className="div-for-dropdown"),    
 
-app.layout = html.Div(
+base_ui = html.Div(className="",
     children=[
-        dcc.Store(id='clientside-data-store'),
+        html.H2("USA DRUG BIAS MAP"),
+        html.P(
+            """Select different drugs, as well as different map types and usage models by changing the options below."""
+        ),
         html.Div(
-            className="row",
-            children=[
-                # Column for user controls
-                html.Div(
-                    className="three columns div-user-controls",
-                    children=[
-                        html.H2("USA DRUG BIAS MAP"),
-                        html.P(
-                            """Select different drugs, as well as different map types and usage models by changing the options below."""
-                        ),
-                        html.Div(html.Label(["Drug Type:",dcc.Dropdown(
-                        id='drugtype',
-                        options=[
-                            {'label': 'Cannabis', 'value': 'cannabis'}],
-                        style={'width': '100%', 'display': 'block'},
-                        value='cannabis'
-                        )]),className="div-for-dropdown"),
-                    html.Div(html.Label(["Geospatial Smoothing:", 
-                        dcc.RadioItems(
-                            id='smoothing',
-                            options=[
-                            {'label': 'On', 'value': 'on'},
-                            {'label': 'Off', 'value': 'off'},
-                            ],
-                        style={'width': '100%', 'display': 'block'},
-                        value='off'
-                        )]),className="div-for-dropdown"),
-                    html.Div(
-                        html.Label(["Map Type:",dcc.RadioItems(
+            html.Label(["Drug Type:",
+                dcc.Dropdown(
+                    id='drugtype',
+                    options=[
+                        {'label': 'Cannabis', 'value': 'cannabis'}],
+                    style={'width': '100%', 'display': 'block'},
+                    value='cannabis')]),
+            className="div-for-dropdown"),
+        html.Div(
+            html.Label(["Map Type:",
+                dcc.RadioItems(
                     id='maptype',
                     options=[
                         {'label': 'Quantiles', 'value': 'quantiles'},
@@ -97,19 +92,22 @@ app.layout = html.Div(
                     labelStyle={'display': 'inline-block', "padding-right": "10px"},
                     style={'width': '100%', 'display': 'block', "margin-right": "10px"},
                     value='standard',
-                    )]),className="div-for-dropdown"),
-                    html.Div(
-                        html.Label(["CI Type:",dcc.RadioItems(
+                    )]),
+            className="selector"),
+        html.Div(
+            html.Label(["CI Type:",
+                dcc.RadioItems(
                     id='citype',
                     options=[
                         {'label': 'Wilson Interval', 'value': 'wilson'},
-                        # {'label': 'Bootstrap', 'value': 'bootstraps'},
                     ],
                     style={'width': '100%', 'display': 'block'},
                     value='wilson',
-                    )]),className="div-for-dropdown"),
-                    html.Div(
-                        html.Label(["Usage Model:",dcc.RadioItems(
+                    )]),
+            className="div-for-dropdown"),
+        html.Div(
+            html.Label(["Usage Model:",
+                dcc.RadioItems(
                     id='usagemodel',
                     options=[
                         {'label': 'Age, Race, Sex', 'value': 'normal'},
@@ -118,80 +116,145 @@ app.layout = html.Div(
                     ],
                     style={'width': '100%', 'display': 'block'},
                     value='normal',
-                    )]),className="div-for-dropdown"),
-                    html.Div(
-                    html.Label(["Republican Vote Share (2020):", dcc.Checklist(
-                        id="republican-boxes",
-                        options=[
-                            {'label': '<20%', 'value': '<20%'},
-                            {'label': '20-40%', 'value': '20-40%'},
-                            {'label': '40-60%', 'value': '40-60%'},
-                            {'label': '60-80%', 'value': '60-80%'},
-                            {'label': '80-100%', 'value': '80-100%'},
-                        ],
-                        value=['<20%', '20-40%', '40-60%', '60-80%', '80-100%'],
-                        labelStyle={'display': 'inline-block', "padding-right": "10px"}
-                    )]), className="div-for-dropdown"),
-                    dcc.Markdown(
-                        """
-                        Source: NIBRS Drug Incidient Bias - Link to paper to be added.
-                        
-                        Links: [Source Code](https://github.com/predictive-analytics-lab/drug-map) | [Twitter] (https://twitter.com/WeArePal_ai)
-                        """
-                    ),
+                    )]),
+            className="div-for-dropdown"),
+        html.Div(
+            html.Label(["Republican Vote Share (2020):", 
+                dcc.Checklist(
+                    id="republican-boxes",
+                    options=[
+                        {'label': '<20%', 'value': '<20%'},
+                        {'label': '20-40%', 'value': '20-40%'},
+                        {'label': '40-60%', 'value': '40-60%'},
+                        {'label': '60-80%', 'value': '60-80%'},
+                        {'label': '80-100%', 'value': '80-100%'},
                     ],
-                ),
-                # Column for app graphs and plots
-                html.Div(
-                    className="nine columns div-for-charts bg-grey",
-                    children=[
-                        dcc.Graph(id="drug-map", style={"height":"93vh"}),
-                        dcc.Slider(
-                            id='time-slider',
-                            min=2012,
-                            max=2019,
-                            step=1,
-                            value=2019,
-                            marks={year: str(year) for year in range(2012, 2020)})
+                    value=['<20%', '20-40%', '40-60%', '60-80%', '80-100%'],
+                    labelStyle={'display': 'inline-block', "padding-right": "10px"}
+                    )]), 
+            className="div-for-dropdown"),
+        dcc.Markdown(
+            """
+            Source: NIBRS Drug Incidient Bias - Link to paper to be added.
+            
+            Links: [Source Code](https://github.com/predictive-analytics-lab/drug-map) | [Twitter] (https://twitter.com/WeArePal_ai)
+            """
+        )])
+
+smoothing_ui = html.Div(className="",
+    children=[
+        dcc.RadioItems(id='maptype', value="standard", style = dict(display='none')),
+        dcc.RadioItems(id='usagemodel', value="normal", style = dict(display='none')),
+        dcc.RadioItems(id='citype', value="none", style = dict(display='none')),
+        html.H2("USA DRUG BIAS MAP"),
+        html.P(
+            """Select different drugs, as well as different map types and usage models by changing the options below."""
+        ),
+        html.Div(
+            html.Label(["Drug Type:",
+                dcc.Dropdown(
+                    id='drugtype',
+                    options=[
+                        {'label': 'Cannabis', 'value': 'cannabis'}],
+                    style={'width': '100%', 'display': 'block'},
+                    value='cannabis')]),
+            className="div-for-dropdown"),
+        html.Div(
+            html.Label(["Republican Vote Share (2020):", 
+                dcc.Checklist(
+                    id="republican-boxes",
+                    options=[
+                        {'label': '<20%', 'value': '<20%'},
+                        {'label': '20-40%', 'value': '20-40%'},
+                        {'label': '40-60%', 'value': '40-60%'},
+                        {'label': '60-80%', 'value': '60-80%'},
+                        {'label': '80-100%', 'value': '80-100%'},
                     ],
-                ),
-            ],
+                    value=['<20%', '20-40%', '40-60%', '60-80%', '80-100%'],
+                    labelStyle={'display': 'inline-block', "padding-right": "10px"}
+                    )]), 
+            className="div-for-dropdown"),
+        dcc.Markdown(
+            """
+            Source: NIBRS Drug Incidient Bias - Link to paper to be added.
+            
+            Links: [Source Code](https://github.com/predictive-analytics-lab/drug-map) | [Twitter] (https://twitter.com/WeArePal_ai)
+            """
+        )])
+
+drug_map = dcc.Graph(id="drug-map", style={"height":"85vh"})
+smoothed_map = dcc.Graph(id="smoothed-map", style={"height":"85vh"})
+
+
+tab_style = {
+    "background-color": "#31302F",
+    "color": "#d8d8d8",
+    "border-color": "#31302F",
+    "font-size": "1.2em",
+}
+
+selected_tab_style = {
+    "background-color": "#31302F",
+    "color": "#FFFFFF",
+    "border": "0",
+    "font-size": "1.2em",
+    "box-shadow": "0 0 15px 0px #000",
+    "clip-path": "inset(0px -15px 0px -15px)"
+}
+
+app.layout = html.Div(
+    children=[
+        dcc.Store(id='clientside-data-store'),
+        html.Div(
+            id="ui-div",
+            className="three columns div-user-controls",
+            children=[base_ui],
+        ),
+        html.Div(
+            className="nine columns div-for-charts bg-grey",
+            children=[
+                dcc.Tabs(id="tabs", value='standard', children=[
+                    dcc.Tab(id="standard_tab", className="custom-tab", label='Standard Map', style=tab_style, selected_style=selected_tab_style, value="standard", children=[drug_map]),
+                    dcc.Tab(id="smoothed_tab", className="custom-tab", label='Smoothed Map', style=tab_style, selected_style=selected_tab_style, value="smoothed", children=[smoothed_map])
+                ]),
+                dcc.Slider(
+                    id='time-slider',
+                    min=2012,
+                    max=2019,
+                    step=1,
+                    value=2019,
+                    marks={year: str(year) for year in range(2012, 2020)})
+            ]
         )
     ]
 )
 
-@app.callback([Output('maptype','value'), Output('citype', 'value'), Output('usagemodel','value'), Output('maptype','options'), Output('citype','options'), Output('usagemodel','options')], [Input('smoothing', 'value')])
-def dynamic_options(smoothing: str):
-    bool_switch = smoothing == "on"
-    map_type_options = [
-        {'label': 'Quantiles', 'value': 'quantiles', "disabled": bool_switch},
-        {'label': 'Log', 'value': 'standard', "disabled": False},
-        {'label': '95% Confidence', 'value': 'confidence', "disabled": bool_switch},
-    ]
-    ci_type_options = [{'label': 'None', 'value': 'none', "disabled": False}, 
-                       {'label': 'Wilson Interval', 'value': 'wilson', "disabled": bool_switch}]
-    model_options = [
-        {'label': 'Age, Race, Sex', 'value': 'normal', "disabled": False},
-        {'label': 'Age, Race, Sex, Poverty Status', 'value': 'poverty', "disabled": bool_switch},
-        {'label': 'Age, Race, Sex, Urban Area', 'value': 'urban', "disabled": bool_switch},
-    ]
-    if bool_switch:
-        return "standard", "none", "normal", map_type_options, ci_type_options, model_options
+@app.callback([Output('ui-div', 'children'), Output('standard_tab', 'children'), Output('smoothed_tab', 'children')], [Input('tabs', 'value')])
+def update_ui(tabs: str) -> list:
+    if tabs == "standard":
+        return [base_ui], [drug_map], [smoothed_map]
     else:
-        return "standard", "wilson", "normal", map_type_options, ci_type_options, model_options
-        
+        return [smoothing_ui], [drug_map], [smoothed_map]
 
-@app.callback(Output('clientside-data-store','data'),[Input('drugtype','value'),
-                                           Input('usagemodel','value'),
-                                           Input('citype','value'),
-                                           Input('time-slider','value'),
-                                           Input('republican-boxes','value'),
-                                           Input('smoothing', 'value')])
+@app.callback(
+    [
+        Output('clientside-data-store','data')
+    ],
+    [
+        Input('drugtype','value'),
+        Input('usagemodel','value'),
+        Input('citype','value'),
+        Input('time-slider','value'),
+        Input('republican-boxes','value'),
+    ],
+    [
+        State('tabs', 'value')
+    ])
 @cache.memoize(timeout=timeout)
-def update_store(drugtype: str, model: str, citype: str, time: int, republican: List[str], smoothed: str) -> pd.DataFrame:
-    df = mapping.args_to_df(drug_type=drugtype, smoothed=smoothed == "on", year=time, citype=citype, model=model, republican_cats=republican)
-    return df.reset_index().to_dict(orient='list')
-
+def update_data(drugtype: str, model: str, citype: str, time: int, republican: List[str], tab: str) -> dict:
+    df = mapping.args_to_df(drug_type=drugtype, smoothed=tab=="smoothed", year=time, citype=citype, model=model, republican_cats=republican)
+    df_dict = df.reset_index().to_dict(orient='list')
+    return [df_dict]
 
 app.clientside_callback(
     ClientsideFunction(
@@ -199,11 +262,11 @@ app.clientside_callback(
         function_name='get_map'
     ),
     Output('drug-map', 'figure'),
+    Output('smoothed-map', 'figure'),
     Input('clientside-data-store', 'data'),
     Input('maptype', 'value'),
-    Input('smoothing', 'value')
+    State('tabs', 'value')
 )
 
-
-# if __name__ == '__main__':
-#     app.run_server(debug=False)
+if __name__ == "__main__":
+    server.run(debug=True)

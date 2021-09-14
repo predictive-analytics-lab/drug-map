@@ -3,7 +3,9 @@ function standard_map(data, smoothing){
 
     var arr = [];
 
-    if (smoothing == "off") {
+    console.log(smoothing);
+
+    if (smoothing == "standard") {
         arr.push(data["incidents"]);
         arr.push(data["bwratio"]);
         arr.push(data["slci"]);
@@ -16,6 +18,8 @@ function standard_map(data, smoothing){
         arr.push(data["perc_republican_votes"]);
         template = "Selection ratio: %{customdata[2]}<br>Incidents: %{customdata[0]}<br>Black/White population ratio: %{customdata[1]:.3f}<br>Republican vote share: %{customdata[3]}\%<extra></extra>"
     }
+
+    console.log(arr);
 
     transpose = m => m[0].map((x,i) => m.map(x => x[i]))
     
@@ -166,11 +170,14 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
     clientside: {
         get_map: function(data, maptype, smoothing) {
             if (maptype == "standard") {
-                return standard_map(data, smoothing);
+                result = standard_map(data, smoothing)
+                return [result, result];
             } else if (maptype == "confidence") {
-                return confidence_map(data);
+                result = confidence_map(data)
+                return [result, result];
             } else {
-                return quantile_map(data);
+                result = quantile_map(data)
+                return [result, result];
             }
         }
     }
