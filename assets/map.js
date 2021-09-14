@@ -3,23 +3,21 @@ function standard_map(data, smoothing){
 
     var arr = [];
 
-    console.log(smoothing);
+    console.log(data);
 
-    if (smoothing == "standard") {
+    if ("slci" in data) {
         arr.push(data["incidents"]);
         arr.push(data["bwratio"]);
         arr.push(data["slci"]);
         arr.push(data["perc_republican_votes"]);
         template = "Selection ratio: %{customdata[2]}<br>Incidents: %{customdata[0]}<br>Black/White population ratio: %{customdata[1]:.3f}<br>Republican vote share: %{customdata[3]}\%<extra></extra>"
-    } else if(!("slci" in data)) {
+    } else {
         arr.push(data["incidents"]);
         arr.push(data["bwratio"]);
         arr.push(data["selection_ratio"]);
         arr.push(data["perc_republican_votes"]);
         template = "Selection ratio: %{customdata[2]}<br>Incidents: %{customdata[0]}<br>Black/White population ratio: %{customdata[1]:.3f}<br>Republican vote share: %{customdata[3]}\%<extra></extra>"
     }
-
-    console.log(arr);
 
     transpose = m => m[0].map((x,i) => m.map(x => x[i]))
     

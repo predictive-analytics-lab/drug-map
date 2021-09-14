@@ -93,7 +93,7 @@ base_ui = html.Div(className="",
                     style={'width': '100%', 'display': 'block', "margin-right": "10px"},
                     value='standard',
                     )]),
-            className="selector"),
+            className="div-for-dropdown"),
         html.Div(
             html.Label(["CI Type:",
                 dcc.RadioItems(
@@ -158,6 +158,31 @@ smoothing_ui = html.Div(className="",
                         {'label': 'Cannabis', 'value': 'cannabis'}],
                     style={'width': '100%', 'display': 'block'},
                     value='cannabis')]),
+            className="div-for-dropdown"),
+        html.Div(
+            html.Label(["Map Type:",
+                dcc.RadioItems(
+                    id='maptype',
+                    options=[
+                        {'label': 'Quantiles', 'value': 'quantiles'},
+                        {'label': 'Log', 'value': 'standard'},
+                        {'label': '95% Confidence', 'value': 'confidence'},
+                    ],
+                    labelStyle={'display': 'inline-block', "padding-right": "10px"},
+                    style={'width': '100%', 'display': 'block', "margin-right": "10px"},
+                    value='standard',
+                    )]),
+            className="div-for-dropdown"),
+        html.Div(
+            html.Label(["CI Type:",
+                dcc.RadioItems(
+                    id='citype',
+                    options=[
+                        {'label': 'Wilson Interval', 'value': 'wilson'},
+                    ],
+                    style={'width': '100%', 'display': 'block'},
+                    value='wilson',
+                    )]),
             className="div-for-dropdown"),
         html.Div(
             html.Label(["Republican Vote Share (2020):", 
