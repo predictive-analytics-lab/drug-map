@@ -68,6 +68,7 @@ if 'DYNO' in os.environ:
 base_ui = html.Div(className="",
     children=[
         dcc.RadioItems(id='urbanfilter', value="2", style = dict(display='none')),
+        dcc.RadioItems(id='smoothingparameter', value="1.0", style = dict(display='none')),
         html.H2("USA DRUG BIAS MAP"),
         html.P(
             """Select different drugs, as well as different map types and usage models by changing the options below."""
@@ -145,7 +146,7 @@ base_ui = html.Div(className="",
 smoothing_ui = html.Div(className="",
     children=[
         dcc.RadioItems(id='maptype', value="standard", style = dict(display='none')),
-        dcc.RadioItems(id='usagemodel', value="normal", style = dict(display='none')),
+        dcc.RadioItems(id='usagemodel', value="poverty", style = dict(display='none')),
         dcc.RadioItems(id='citype', value="none", style = dict(display='none')),
         html.H2("USA DRUG BIAS MAP"),
         html.P(
@@ -194,6 +195,26 @@ smoothing_ui = html.Div(className="",
                     value=2,
                     marks={m: str(m) for m in range(2, 4)}
                 )]),
+            className="div-for-dropdown"),
+        html.Div([
+            dcc.Markdown("""
+                         Current smoothing function is a simple average weighted by the distance from surrounding counties.
+                         
+                         Where the weights are:
+                         
+                            \\[ 1 / (d+1)^p \\]
+                         
+                         Where \\(d\\) is the distance between the smoothing point and the county, and \\(p\\) is the power of the distance that can be controlled with the slider below:
+                         """),
+            html.Label(["Smoothing Power:",      
+                dcc.Slider(
+                    id='smoothingparameter',
+                    min=1,
+                    max=2,
+                    step=None,
+                    value=1,
+                    marks={m: str(m) for m in [1, 1.5, 2]}
+                )])],
             className="div-for-dropdown"),
         html.Div(
             html.Label(["Republican Vote Share (2020):", 
@@ -283,13 +304,14 @@ def update_ui(tabs: str) -> list:
         Input('time-slider','value'),
         Input('republican-boxes','value'),
         Input('urbanfilter','value'),
+        Input('smoothingparameter', 'value')
     ],
     [
         State('tabs', 'value')
     ])
 @cache.memoize(timeout=timeout)
-def update_data(drugtype: str, model: str, citype: str, time: int, republican: List[str], urban_filter: int, tab: str) -> dict:
-    df = mapping.args_to_df(drug_type=drugtype, smoothed=tab=="smoothed", year=time, citype=citype, model=model, republican_cats=republican, urban_filter=str(urban_filter))
+def update_data(drugtype: str, model: str, citype: str, time: int, republican: List[str], urban_filter: int, smoothing_parameter: str, tab: str) -> dict:
+    df = mapping.args_to_df(drug_type=drugtype, smoothed=tab=="smoothed", year=time, citype=citype, model=model, republican_cats=republican, urban_filter=str(urban_filter), smoothing_param=float(smoothing_parameter))
     df_dict = df.reset_index().to_dict(orient='list')
     return [df_dict]
 
