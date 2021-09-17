@@ -18,6 +18,9 @@ server.secret_key = os.environ.get('secret_key', 'secret')
 
 app = dash.Dash('Drug map', server=server)
 
+mathjax = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-MML-AM_CHTML'
+app.scripts.append_script({ 'external_url' : mathjax })
+
 cache = Cache()
 
 cache_servers = os.environ.get('MEMCACHIER_SERVERS')
@@ -197,14 +200,14 @@ smoothing_ui = html.Div(className="",
                 )]),
             className="div-for-dropdown"),
         html.Div([
-            dcc.Markdown("""
+            html.P("""
                          Current smoothing function is a simple average weighted by the distance from surrounding counties.
                          
                          Where the weights are:
                          
-                            \\[ 1 / (d+1)^p \\]
+                            1 / (d + 1) ** p
                          
-                         Where \\(d\\) is the distance between the smoothing point and the county, and \\(p\\) is the power of the distance that can be controlled with the slider below:
+                         Where d is the distance between the smoothing point and the county, and p is the power of the distance that can be controlled with the slider below:
                          """),
             html.Label(["Smoothing Power:",      
                 dcc.Slider(
