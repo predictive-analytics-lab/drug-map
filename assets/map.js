@@ -10,13 +10,17 @@ function standard_map(data, smoothing){
         arr.push(data["bwratio"]);
         arr.push(data["slci"]);
         arr.push(data["perc_republican_votes"]);
-        template = "Selection ratio: %{customdata[2]}<br>Incidents: %{customdata[0]}<br>Black/White population ratio: %{customdata[1]:.3f}<br>Republican vote share: %{customdata[3]}\%<extra></extra>"
+        arr.push(data["urban_code"]);
+        arr.push(data["frequency"]);
+        template = "Selection ratio: %{customdata[2]}<br>Incidents: %{customdata[0]}<br>Black/White population ratio: %{customdata[1]:.3f}<br>Republican vote share: %{customdata[3]}\%<br>Urban Code: %{customdata[4]}<br>Population: %{customdata[5]}<extra></extra>"
     } else {
         arr.push(data["incidents"]);
         arr.push(data["bwratio"]);
         arr.push(data["selection_ratio"]);
         arr.push(data["perc_republican_votes"]);
-        template = "Selection ratio: %{customdata[2]}<br>Incidents: %{customdata[0]}<br>Black/White population ratio: %{customdata[1]:.3f}<br>Republican vote share: %{customdata[3]}\%<extra></extra>"
+        arr.push(data["urban_code"]);
+        arr.push(data["frequency"]);
+        template = "Selection ratio: %{customdata[2]}<br>Incidents: %{customdata[0]}<br>Black/White population ratio: %{customdata[1]:.3f}<br>Republican vote share: %{customdata[3]}\%<br>Urban Code: %{customdata[4]}<br>Population: %{customdata[5]}<extra></extra>"
     }
 
     transpose = m => m[0].map((x,i) => m.map(x => x[i]))
@@ -82,6 +86,8 @@ function confidence_map(data){
         arr.push(idxs.map(i => data["slci"][i]));
         arr.push(idxs.map(i => data["cat"][i]));
         arr.push(idxs.map(i => data["perc_republican_votes"][i]));
+        arr.push(idxs.map(i => data["urban_code"][i]));
+        arr.push(idxs.map(i => data["frequency"][i]));
 
         transpose = m => m[0].map((x,i) => m.map(x => x[i]))
         
@@ -99,7 +105,7 @@ function confidence_map(data){
             showscale: false,
             showlegend: true,
             hovertemplate:
-            "Category: %{customdata[3]}<br>Selection ratio: %{customdata[2]}<br>Incidents: %{customdata[0]}<br>Black/White population ratio: %{customdata[1]:.3f}<br>Republican vote share: %{customdata[4]}\%<extra></extra>"
+            "Category: %{customdata[3]}<br>Selection ratio: %{customdata[2]}<br>Incidents: %{customdata[0]}<br>Black/White population ratio: %{customdata[1]:.3f}<br>Republican vote share: %{customdata[4]}\%<br>Urban Code: %{customdata[5]}<br>Population: %{customdata[6]}<extra></extra>"
         };
 
         Figure["data"].push(pldata)
@@ -138,6 +144,8 @@ function quantile_map(data){
         arr.push(idxs.map(i => data["slci"][i]));
         arr.push(idxs.map(i => data["percentiles"][i]));
         arr.push(idxs.map(i => data["perc_republican_votes"][i]));
+        arr.push(idxs.map(i => data["urban_code"][i]));
+        arr.push(idxs.map(i => data["frequency"][i]));
 
         transpose = m => m[0].map((x,i) => m.map(x => x[i]))
         
@@ -155,7 +163,7 @@ function quantile_map(data){
             showscale: false,
             showlegend: true,
             hovertemplate:
-            "Percentile: %{customdata[3]}<br>Selection Ratio: %{customdata[2]}<br>Incidents: %{customdata[0]}<br>Black/White population ratio: %{customdata[1]:.3f}<br>Republican vote share: %{customdata[4]}\%<extra></extra>"
+            "Percentile: %{customdata[3]}<br>Selection Ratio: %{customdata[2]}<br>Incidents: %{customdata[0]}<br>Black/White population ratio: %{customdata[1]:.3f}<br>Republican vote share: %{customdata[4]}\%<br>Urban Code: %{customdata[5]}<br>Population: %{customdata[6]}<extra></extra>"
         };
 
         Figure["data"].push(pldata)
