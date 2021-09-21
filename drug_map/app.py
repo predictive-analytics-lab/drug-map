@@ -149,7 +149,7 @@ base_ui = html.Div(className="",
 smoothing_ui = html.Div(className="",
     children=[
         dcc.RadioItems(id='maptype', value="standard", style = dict(display='none')),
-        dcc.RadioItems(id='usagemodel', value="poverty", style = dict(display='none')),
+        dcc.RadioItems(id='usagemodel', value="normal", style = dict(display='none')),
         dcc.RadioItems(id='citype', value="none", style = dict(display='none')),
         html.H2("USA DRUG BIAS MAP"),
         html.P(
