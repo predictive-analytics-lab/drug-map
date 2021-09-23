@@ -163,21 +163,27 @@ base_ui = html.Div(
             className="div-for-dropdown",
         ),
         html.Div(
-            html.Label(
-                [
-                    "Usage Target:",
-                    dcc.RadioItems(
-                        id="usagetarget",
-                        options=[
-                            {"label": "Using", "value": "using"},
-                            {"label": "Buying", "value": "buying"},
-                            {"label": "Buying Outside", "value": "buying_outside"},
-                        ],
-                        style={"width": "100%", "display": "block"},
-                        value="using",
-                    ),
-                ]
-            ),
+            [
+                dcc.Markdown(
+                    """Usage Target currently only functions when the usage model is set to "Age, Race, Sex, Poverty".
+            """
+                ),
+                html.Label(
+                    [
+                        "Usage Target:",
+                        dcc.RadioItems(
+                            id="usagetarget",
+                            options=[
+                                {"label": "Using", "value": "using"},
+                                {"label": "Buying", "value": "buying"},
+                                {"label": "Buying Outside", "value": "buying_outside"},
+                            ],
+                            style={"width": "100%", "display": "block"},
+                            value="using",
+                        ),
+                    ]
+                ),
+            ],
             className="div-for-dropdown",
         ),
         html.Div(
