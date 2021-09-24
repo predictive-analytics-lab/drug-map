@@ -133,6 +133,7 @@ base_ui = html.Div(
                         id="citype",
                         options=[
                             {"label": "Wilson Interval", "value": "wilson"},
+                            {"label": "Delta", "value": "delta"},
                         ],
                         style={"width": "100%", "display": "block"},
                         value="wilson",
